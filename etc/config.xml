@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <parcellab>
+            <general>
+                <enabled>0</enabled>
+                <test_mode_enabled>1</test_mode_enabled>
+                <api_url>https://api.parcellab.com/</api_url>
+            </general>
+            <auto_export>
+                <enabled>0</enabled>
+                <schedule>*/10 * * * *</schedule>
+            </auto_export>
+        </parcellab>
+    </default>
+</config>

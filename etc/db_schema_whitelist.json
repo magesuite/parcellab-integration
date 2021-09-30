@@ -1,0 +1,7 @@
+{
+    "sales_shipment_track": {
+        "column": {
+            "exported_to_parcellab": true
+        }
+    }
+}

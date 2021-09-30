@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="CreativeStyle\ParcellabIntegration\Api\ParcellabExportManagementInterface"
+                type="CreativeStyle\ParcellabIntegration\Model\ParcellabExportManagement" />
+    <preference for="CreativeStyle\ParcellabIntegration\Api\RequestPreprocessorInterface"
+                type="CreativeStyle\ParcellabIntegration\Model\RequestPreprocessors\OrderCreation" />
+    <preference for="CreativeStyle\ParcellabIntegration\Api\ServiceAdapterInterface"
+                type="CreativeStyle\ParcellabIntegration\Model\ServiceAdapter" />
+    <type name="Magento\Sales\Api\ShipmentRepositoryInterface">
+        <plugin name="shipment_repository_interface_export_shipment_to_parcellab"
+                type="CreativeStyle\ParcellabIntegration\Plugin\Sales\Api\ShipmentRepositoryInterface\ExportShipmentToParcellab"/>
+    </type>
+    <type name="Magento\Sales\Model\ResourceModel\Order\Shipment">
+        <plugin name="shipment_resource_model_export_shipment_to_parcellab"
+                type="CreativeStyle\ParcellabIntegration\Plugin\Sales\Model\ResourceModel\Order\Shipment\ExportShipmentToParcellab"/>
+    </type>
+    <type name="Magento\Sales\Api\ShipmentTrackRepositoryInterface">
+        <plugin name="track_repository_interface_export_shipment_to_parcellab"
+                type="CreativeStyle\ParcellabIntegration\Plugin\Sales\Api\ShipmentTrackRepositoryInterface\ExportTrackingToParcellab"/>
+    </type>
+</config>
