@@ -37,7 +37,7 @@
                     </depends>
                 </field>
             </group>
-            <group id="auto_export" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+            <group id="auto_export" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Auto Export</label>
                 <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enabled</label>
@@ -56,6 +56,24 @@
                     </depends>
                     <comment>Only orders with selected status(es) will be exported. If nothing selected, then all orders will be exported.</comment>
                     <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+            </group>
+            <group id="payload_configuration" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Payload Configuration</label>
+                <field id="client_country_code" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Client Country Code</label>
+                    <frontend_model>CreativeStyle\ParcellabIntegration\Block\Adminhtml\Form\Field\ClientCountryCode</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="client_language_code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Client Language Code</label>
+                    <frontend_model>CreativeStyle\ParcellabIntegration\Block\Adminhtml\Form\Field\ClientLanguageCode</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="courier_code" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Courier Code</label>
+                    <frontend_model>CreativeStyle\ParcellabIntegration\Block\Adminhtml\Form\Field\CourierCode</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
             </group>
         </section>

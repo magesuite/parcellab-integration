@@ -32,9 +32,26 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
         $this->productRepository = $this->objectManager->create(\Magento\Catalog\Api\ProductRepositoryInterface::class);
     }
 
+    public static function setUpBeforeClass(): void
+    {
+        require(__DIR__ . '/../../_files/store.php');
+        require(__DIR__ . '/../../_files/configuration.php');
+        parent::setUpBeforeClass();
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        require(__DIR__ . '/../../_files/store_rollback.php');
+        require(__DIR__ . '/../../_files/configuration_rollback.php');
+        parent::tearDownAfterClass();
+    }
+
     /**
+     * @magentoDbIsolation disabled
+     * @magentoAppIsolation enabled
      * @magentoAppArea adminhtml
-     * @magentoDataFixture loadShipments
+     * @magentoDataFixture loadOrder
+     * @magentoDataFixture loadShipment
      * @magentoConfigFixture default_store parcellab/general/test_mode_enabled 1
      */
     public function testItPreparesCorrectPayloadForParcellab()
@@ -52,12 +69,12 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->getExpectedPayload($shipment), $payload);
     }
 
-    public static function loadShipments()
-    {
-        include __DIR__ . '/../../_files/shipment_list.php';
-    }
-
-    private function getExpectedPayload($shipment)
+    /**
+     * @param \Magento\Sales\Model\Order\Shipment $shipment
+     * @return array[]
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function getExpectedPayload(\Magento\Sales\Model\Order\Shipment $shipment): array
     {
         $productId = current($shipment->getItems())->getProductId();
         $product = $this->productRepository->getById($productId);
@@ -66,16 +83,16 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
 
         return [
             'json' => [
-                'client' => 'default',
+                'client' => 'BEL',
                 'orderNo' => $shipment->getIncrementId(),
                 'recipient' => 'firstname lastname',
                 'customerNo' => $shippingAddress->getId(),
                 'email' => 'customer@null.com',
                 'street' => 'street',
-                'city' => 'Los Angeles',
+                'city' => 'city',
                 'phone' => '11111111',
-                'zip_code' => '11111',
-                'language_iso3' => 'en',
+                'zip_code' => '1111',
+                'language_iso3' => 'nl',
                 'order_date' => $shipment->getCreatedAt(),
                 'articles' => [
                     [
@@ -93,8 +110,27 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
+    /**
+     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @return string
+     */
     protected function getProductImageUrl(\Magento\Catalog\Api\Data\ProductInterface $product): string
     {
         return $this->imageHelper->init($product, 'product_thumbnail_image')->getUrl();
+    }
+
+    public static function loadOrder()
+    {
+        include __DIR__ . '/../../_files/order.php';
+    }
+
+    public static function loadOrderRollback()
+    {
+        include __DIR__ . '/../../_files/order_rollback.php';
+    }
+
+    public static function loadShipment()
+    {
+        include __DIR__ . '/../../_files/shipment.php';
     }
 }
