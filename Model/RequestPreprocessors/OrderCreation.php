@@ -68,6 +68,19 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
      */
     protected $productRepository;
 
+    protected $storeHelper;
+
+    /**
+     * @param \CreativeStyle\ParcellabIntegration\Helper\Configuration $configuration
+     * @param \Magento\Store\Api\Data\StoreInterface $store
+     * @param \Magento\Framework\Locale\Resolver $localeResolver
+     * @param \Magento\Catalog\Helper\Image $imageHelper
+     * @param \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param \Magento\Catalog\Api\CategoryListInterface $categoryListRepository
+     * @param \CreativeStyle\ParcellabIntegration\Model\Product\OptionsFormatter $optionsFormatter
+     * @param \Magento\Catalog\Api\ProductRepositoryInterface $productRepository
+     * @param \CreativeStyle\ParcellabIntegration\Helper\Store $storeHelper
+     */
     public function __construct(
         \CreativeStyle\ParcellabIntegration\Helper\Configuration $configuration,
         \Magento\Store\Api\Data\StoreInterface $store,
@@ -76,7 +89,8 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Catalog\Api\CategoryListInterface $categoryListRepository,
         \CreativeStyle\ParcellabIntegration\Model\Product\OptionsFormatter $optionsFormatter,
-        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository
+        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+        \CreativeStyle\ParcellabIntegration\Helper\Store $storeHelper
     ) {
         parent::__construct($configuration, $store);
         $this->configuration = $configuration;
@@ -86,8 +100,14 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->optionsFormatter = $optionsFormatter;
         $this->productRepository = $productRepository;
+        $this->storeHelper = $storeHelper;
     }
 
+    /**
+     * @param array $args
+     * @return array
+     * @throws \Magento\Framework\Exception\InvalidArgumentException
+     */
     public function preparePayload(array $args = []): array
     {
         $shipment = $args[self::SHIPMENT_ARG] ?? null;
@@ -105,7 +125,7 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         }
 
         $payload = [
-            self::PAYLOAD_CLIENT => $shipment->getStore()->getCode(),
+            self::PAYLOAD_CLIENT => $this->getCountryCode((int) $shipment->getStore()->getId()),
             self::PAYLOAD_ORDER_NO => $shipment->getIncrementId(),
             self::PAYLOAD_RECIPIENT_NOTIFICATION => $shippingAddress->getPrefix(),
             self::PAYLOAD_RECIPIENT => $shippingAddress->getName(),
@@ -115,7 +135,7 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
             self::PAYLOAD_CITY => $shippingAddress->getCity(),
             self::PAYLOAD_PHONE => $shippingAddress->getTelephone(),
             self::PAYLOAD_ZIP_CODE => $shippingAddress->getPostCode(),
-            self::PAYLOAD_LANGUAGE => $this->getLanguageCodeByShipment($shipment),
+            self::PAYLOAD_LANGUAGE => $this->getLanguageCode((int) $shipment->getStore()->getId()),
             self::PAYLOAD_ORDER_DATE => $shipment->getCreatedAt(),
             self::PAYLOAD_ARTICLES => $this->getItemsPayload($shipment->getAllItems())
         ];
@@ -129,6 +149,10 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         return [\GuzzleHttp\RequestOptions::JSON => array_filter($payload)];
     }
 
+    /**
+     * @param bool $track
+     * @return string
+     */
     public function getEndPointUrl(bool $track = false): string
     {
         $path = $track ? self::API_PATH_TRACKING : self::API_PATH_ORDER;
@@ -136,14 +160,32 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         return $this->configuration->getApiUrl() . $path;
     }
 
+    /**
+     * @param array $trackingData
+     * @return array
+     */
     public function getTrackingPayload(array $trackingData): array
     {
         return [
-            self::PAYLOAD_TRACKING_COURIER => $trackingData['title'],
-            self::PAYLOAD_TRACKING_NUMBER => $trackingData['number'] ?? $trackingData['track_number'],
+            self::PAYLOAD_TRACKING_COURIER => $this->getCourierName($trackingData),
+            self::PAYLOAD_TRACKING_NUMBER => $trackingData['number'] ?? $trackingData['track_number']
         ];
     }
 
+    /**
+     * @param array $trackingData
+     * @return string
+     */
+    public function getCourierName(array $trackingData): string
+    {
+        $courierCodes = $this->configuration->getCourierCodes();
+
+        return $courierCodes[$trackingData['title']] ?? '';
+    }
+
+    /**
+     * @return array
+     */
     public function getTestModePayload(): array
     {
         $testModeFlag = (bool)$this->configuration->isTestModeEnabled();
@@ -155,6 +197,10 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         ];
     }
 
+    /**
+     * @param array $items
+     * @return array
+     */
     protected function getItemsPayload(array $items)
     {
         $result = [];
@@ -177,6 +223,10 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         return $result;
     }
 
+    /**
+     * @param $product
+     * @return string
+     */
     protected function getProductImageUrl($product): string
     {
         if (!$product) {
@@ -185,12 +235,32 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         return $this->imageHelper->init($product, 'product_thumbnail_image')->getUrl();
     }
 
-    protected function getLanguageCodeByShipment(\Magento\Sales\Api\Data\ShipmentInterface $shipment): string
+    /**
+     * @param int $storeId
+     * @return string
+     */
+    protected function getCountryCode(int $storeId): string
     {
-        $locale = $this->localeResolver->emulate($shipment->getStoreId());
-        return strstr($locale, '_', true);
+        $clientCountryCodes = $this->configuration->getClientCountryCodes();
+
+        return $clientCountryCodes[$storeId] ?? '';
     }
 
+    /**
+     * @param int $storeId
+     * @return string
+     */
+    protected function getLanguageCode(int $storeId): string
+    {
+        $clientLanguageCodes = $this->configuration->getClientLanguageCodes();
+
+        return $clientLanguageCodes[$storeId] ?? '';
+    }
+
+    /**
+     * @param $product
+     * @return string
+     */
     protected function getProductCategoryNames($product): string
     {
         if (!$product) {
