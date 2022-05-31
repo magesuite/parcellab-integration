@@ -17,4 +17,3 @@ $order->delete();
 
 $registry->unregister('isSecureArea');
 $registry->register('isSecureArea', false);
-
