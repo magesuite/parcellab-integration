@@ -6,11 +6,13 @@ namespace CreativeStyle\ParcellabIntegration\Model\RequestPreprocessors;
 class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPreprocessors\Base
 {
     public const REQUEST_METHOD = 'post';
-    public const API_PATH_ORDER = 'presage';
+    public const API_PATH_ORDER = 'order';
     public const API_PATH_TRACKING = 'track';
+    public const ORDER_ARG = 'order';
     public const SHIPMENT_ARG = 'shipment';
     public const TRACKING_ARG = 'tracking';
 
+    public const PAYLOAD_XID = 'xid';
     public const PAYLOAD_ORDER_NO = 'orderNo';
     public const PAYLOAD_RECIPIENT_NOTIFICATION = 'recipient_notification';
     public const PAYLOAD_RECIPIENT = 'recipient';
@@ -110,23 +112,12 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
      */
     public function preparePayload(array $args = []): array
     {
-        $shipment = $args[self::SHIPMENT_ARG] ?? null;
+        $entity = $this->getEntity($args);
         $trackingData = $args[self::TRACKING_ARG] ?? null;
-        $shippingAddress = $shipment->getShippingAddress();
-
-        if (!$shipment instanceof \Magento\Sales\Api\Data\ShipmentInterface) {
-            throw new \Magento\Framework\Exception\InvalidArgumentException(
-                __(
-                    'Shipment should implement "%1" got "%2"',
-                    \Magento\Sales\Api\Data\OrderInterface::class,
-                    get_class($shipment)
-                )
-            );
-        }
+        $shippingAddress = $entity->getShippingAddress();
 
         $payload = [
-            self::PAYLOAD_CLIENT => $this->getCountryCode((int) $shipment->getStore()->getId()),
-            self::PAYLOAD_ORDER_NO => $shipment->getIncrementId(),
+            self::PAYLOAD_CLIENT => $this->getCountryCode((int) $entity->getStore()->getId()),
             self::PAYLOAD_RECIPIENT_NOTIFICATION => $shippingAddress->getPrefix(),
             self::PAYLOAD_RECIPIENT => $shippingAddress->getName(),
             self::PAYLOAD_CUSTOMER_NO => $shippingAddress->getId(),
@@ -135,10 +126,20 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
             self::PAYLOAD_CITY => $shippingAddress->getCity(),
             self::PAYLOAD_PHONE => $shippingAddress->getTelephone(),
             self::PAYLOAD_ZIP_CODE => $shippingAddress->getPostCode(),
-            self::PAYLOAD_LANGUAGE => $this->getLanguageCode((int) $shipment->getStore()->getId()),
-            self::PAYLOAD_ORDER_DATE => $shipment->getCreatedAt(),
-            self::PAYLOAD_ARTICLES => $this->getItemsPayload($shipment->getAllItems())
+            self::PAYLOAD_LANGUAGE => $this->getLanguageCode((int) $entity->getStore()->getId()),
+            self::PAYLOAD_ORDER_DATE => $entity->getCreatedAt(),
+            self::PAYLOAD_ARTICLES => $this->getItemsPayload($entity->getAllItems())
         ];
+
+        if (isset($args[self::ORDER_ARG])) {
+            $payload[self::PAYLOAD_XID] = $entity->getIncrementId();
+            $payload[self::PAYLOAD_ORDER_NO] = $entity->getIncrementId();
+        }
+
+        if (isset($args[self::SHIPMENT_ARG])) {
+            $payload[self::PAYLOAD_XID] = $entity->getOrder()->getIncrementId();
+            $payload[self::PAYLOAD_ORDER_NO] = $entity->getOrder()->getIncrementId();
+        }
 
         if ($trackingData) {
             $payload = array_merge($payload, $this->getTrackingPayload($trackingData));
@@ -215,8 +216,8 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
                 self::PAYLOAD_ARTICLE_NAME => $item->getName(),
                 self::PAYLOAD_ARTICLE_CATEGORY => $this->getProductCategoryNames($product),
                 self::PAYLOAD_ARTICLE_IMAGE_URL => $this->getProductImageUrl($product),
-                self::PAYLOAD_ARTICLE_QTY => $item->getQty(),
-                self::PAYLOAD_ARTICLE_OPTIONS => $this->optionsFormatter->format($item->getOrderItem()->getProductOptions())
+                self::PAYLOAD_ARTICLE_QTY => $this->getArticleQty($item),
+                self::PAYLOAD_ARTICLE_OPTIONS => $this->getArticleOptions($item)
             ]);
         }
 
@@ -278,5 +279,36 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         }, $categories->getItems());
 
         return implode(', ', $categoryNames);
+    }
+
+    protected function getEntity($args)
+    {
+        if (isset($args[self::SHIPMENT_ARG])) {
+            return $args[self::SHIPMENT_ARG];
+        }
+
+        if (isset($args[self::ORDER_ARG])) {
+            return $args[self::ORDER_ARG];
+        }
+
+        return null;
+    }
+
+    protected function getArticleOptions($item)
+    {
+        if ($item instanceof \Magento\Sales\Model\Order\Item) {
+            return $this->optionsFormatter->format($item->getProductOptions());
+        }
+
+        return $this->optionsFormatter->format($item->getOrderItem()->getProductOptions());
+    }
+
+    protected function getArticleQty($item)
+    {
+        if ($item instanceof \Magento\Sales\Model\Order\Item) {
+            return $item->getQtyOrdered();
+        }
+
+        return $item->getQty();
     }
 }

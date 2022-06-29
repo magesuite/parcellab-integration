@@ -14,27 +14,23 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="order_register_enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Order Registration Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>If enabled order entity will be automatically registered in Parcellab</comment>
+                </field>
                 <field id="test_mode_enabled" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Test Mode Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="api_url" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Api Url</label>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                 </field>
                 <field id="user_id" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>User ID</label>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                 </field>
-                <field id="token" translate="label" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="token" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Token</label>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
                 </field>
             </group>
             <group id="auto_export" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
