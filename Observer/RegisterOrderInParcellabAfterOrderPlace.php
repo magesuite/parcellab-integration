@@ -47,6 +47,5 @@ class RegisterOrderInParcellabAfterOrderPlace implements \Magento\Framework\Even
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
             $this->logger->error($e->getMessage());
         }
-
     }
 }
