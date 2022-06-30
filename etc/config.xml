@@ -4,6 +4,7 @@
         <parcellab>
             <general>
                 <enabled>0</enabled>
+                <order_register_enabled>0</order_register_enabled>
                 <test_mode_enabled>1</test_mode_enabled>
                 <api_url>https://api.parcellab.com/</api_url>
             </general>

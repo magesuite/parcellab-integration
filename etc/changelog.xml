@@ -1,0 +1,15 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:MageSuite_Changelog:etc/changelog.xsd">
+    <module
+        id="CreativeStyle_ParcellabIntegration"
+        name="CreativeStyle_ParcellabIntegration">
+        <changelog>
+            <tag version="1.1.0" date="2022-06-29">
+                <entry>
+                    <type>FEATURE</type>
+                    <overview>Added possibility to register order in Parcellab after order is placed</overview>
+                    <ticket_id>LP-1589</ticket_id>
+                </entry>
+            </tag>
+        </changelog>
+    </module>
+</config>

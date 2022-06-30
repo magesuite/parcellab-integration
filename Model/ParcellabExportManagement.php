@@ -117,6 +117,29 @@ class ParcellabExportManagement implements \CreativeStyle\ParcellabIntegration\A
         }
     }
 
+    public function exportOrder($order)
+    {
+        if (!$this->configuration->isOrderRegisterEnabled($order->getStoreId())) {
+            return;
+        }
+
+        try {
+            $this->serviceAdapter->performRequestToApi(
+                $this->orderCreationPreprocessor,
+                [
+                    \CreativeStyle\ParcellabIntegration\Model\RequestPreprocessors\OrderCreation::ORDER_ARG => $order
+                ]
+            );
+            /** @var \Magento\Sales\Model\Order $order */
+            $order->addCommentToStatusHistory(__("Order has been correctly registered in Parcellab"));
+            $this->orderRepository->save($order);
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            $order->addCommentToStatusHistory(__("Order hasn't been exported to Parcellab. Error message: %1", $e->getMessage()));
+            $this->orderRepository->save($order);
+            $this->logger->error(__("Order hasn't been exported to Parcellab. Error message: %1", $e->getMessage()));
+        }
+    }
+
     public function exportShipmentsByOrderId(int $orderId)
     {
         try {

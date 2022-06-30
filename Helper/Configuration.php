@@ -6,6 +6,7 @@ namespace CreativeStyle\ParcellabIntegration\Helper;
 class Configuration extends \Magento\Framework\App\Helper\AbstractHelper
 {
     public const XML_PATH_CONFIGURATION_ENABLED = 'parcellab/general/enabled';
+    public const XML_PATH_CONFIGURATION_ORDER_REGISTER_ENABLED = 'parcellab/general/order_register_enabled';
     public const XML_PATH_CONFIGURATION_TEST_ENABLED = 'parcellab/general/test_mode_enabled';
     public const XML_PATH_CONFIGURATION_API_URL = 'parcellab/general/api_url';
     public const XML_PATH_CONFIGURATION_USER_ID = 'parcellab/general/user_id';
@@ -43,6 +44,15 @@ class Configuration extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->getValue(
             self::XML_PATH_CONFIGURATION_ENABLED,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $scopeCode
+        );
+    }
+
+    public function isOrderRegisterEnabled($scopeCode = null)
+    {
+        return $this->scopeConfig->getValue(
+            self::XML_PATH_CONFIGURATION_ORDER_REGISTER_ENABLED,
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $scopeCode
         );

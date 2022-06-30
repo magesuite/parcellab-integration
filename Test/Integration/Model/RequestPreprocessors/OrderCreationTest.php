@@ -54,7 +54,7 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
      * @magentoDataFixture loadShipment
      * @magentoConfigFixture default_store parcellab/general/test_mode_enabled 1
      */
-    public function testItPreparesCorrectPayloadForParcellab()
+    public function testItPreparesCorrectShipmentPayloadForParcellab()
     {
         /** @var \Magento\Sales\Model\Order\Shipment $shipment */
         $shipment = $this->objectManager->create(\Magento\Sales\Model\Order\Shipment::class);
@@ -66,7 +66,30 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
             ]
         );
 
-        $this->assertEquals($this->getExpectedPayload($shipment), $payload);
+        $this->assertEquals($this->getExpectedShipmentPayload($shipment), $payload);
+    }
+
+    /**
+     * @magentoDbIsolation disabled
+     * @magentoAppIsolation enabled
+     * @magentoAppArea adminhtml
+     * @magentoDataFixture loadOrder
+     * @magentoDataFixture loadShipment
+     * @magentoConfigFixture default_store parcellab/general/test_mode_enabled 1
+     */
+    public function testItPreparesCorrectOrderPayloadForParcellab()
+    {
+        /** @var \Magento\Sales\Model\Order $order */
+        $order = $this->objectManager->create(\Magento\Sales\Model\Order::class);
+        $order->loadByIncrementId('100000001');
+
+        $payload = $this->orderCreationRequestPreprocessor->preparePayload(
+            [
+                'order' => $order
+            ]
+        );
+
+        $this->assertEquals($this->getExpectedOrderPayload($order), $payload);
     }
 
     /**
@@ -74,7 +97,7 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
      * @return array[]
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function getExpectedPayload(\Magento\Sales\Model\Order\Shipment $shipment): array
+    private function getExpectedShipmentPayload(\Magento\Sales\Model\Order\Shipment $shipment): array
     {
         $productId = current($shipment->getItems())->getProductId();
         $product = $this->productRepository->getById($productId);
@@ -84,7 +107,7 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
         return [
             'json' => [
                 'client' => 'BEL',
-                'orderNo' => $shipment->getIncrementId(),
+                'orderNo' => $shipment->getOrder()->getIncrementId(),
                 'recipient' => 'firstname lastname',
                 'customerNo' => $shippingAddress->getId(),
                 'email' => 'customer@null.com',
@@ -105,7 +128,50 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
                 ],
                 'customFields' => [
                     'testShipment' => true
-                ]
+                ],
+                'xid' => $shipment->getOrder()->getIncrementId()
+            ]
+        ];
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @return array[]
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function getExpectedOrderPayload(\Magento\Sales\Model\Order $order): array
+    {
+        $productId = current($order->getItems())->getProductId();
+        $product = $this->productRepository->getById($productId);
+        $productImageUrl = $this->getProductImageUrl($product);
+        $shippingAddress = $order->getShippingAddress();
+
+        return [
+            'json' => [
+                'client' => 'BEL',
+                'orderNo' => $order->getIncrementId(),
+                'recipient' => 'firstname lastname',
+                'customerNo' => $shippingAddress->getId(),
+                'email' => 'customer@null.com',
+                'street' => 'street',
+                'city' => 'city',
+                'phone' => '11111111',
+                'zip_code' => '1111',
+                'language_iso3' => 'nl',
+                'order_date' => $order->getCreatedAt(),
+                'articles' => [
+                    [
+                        'articleNo' => 'simple',
+                        'articleName' => 'Simple Product',
+                        'articleCategory' => 'Default Category',
+                        'articleImageUrl' => $productImageUrl,
+                        'quantity' => '2.0000',
+                    ]
+                ],
+                'customFields' => [
+                    'testShipment' => true
+                ],
+                'xid' => $order->getIncrementId()
             ]
         ];
     }
