@@ -10,11 +10,6 @@ class ClientCountryCode extends \Magento\Config\Block\System\Config\Form\Field\F
     protected $elementFactory;
 
     /**
-     * @var \Creativestyle\CustomizationLensplaza\Block\Adminhtml\Form\Field\DeliveryTimeMatrixRenderer\Pool
-     */
-    protected $renderersPool;
-
-    /**
      * @var \CreativeStyle\ParcellabIntegration\Helper\Store
      */
     protected $storeHelper;
@@ -22,20 +17,17 @@ class ClientCountryCode extends \Magento\Config\Block\System\Config\Form\Field\F
     /**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Data\Form\Element\Factory $elementFactory
-     * @param \Creativestyle\CustomizationLensplaza\Block\Adminhtml\Form\Field\DeliveryTimeMatrixRenderer\Pool $renderersPool
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Data\Form\Element\Factory $elementFactory,
-        \Creativestyle\CustomizationLensplaza\Block\Adminhtml\Form\Field\DeliveryTimeMatrixRenderer\Pool $renderersPool,
         \CreativeStyle\ParcellabIntegration\Helper\Store $storeHelper,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->elementFactory = $elementFactory;
-        $this->renderersPool = $renderersPool;
         $this->storeHelper = $storeHelper;
     }
 
