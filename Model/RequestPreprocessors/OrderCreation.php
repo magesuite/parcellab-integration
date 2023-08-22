@@ -116,6 +116,7 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         $trackingData = $args[self::TRACKING_ARG] ?? null;
         $shippingAddress = $entity->getShippingAddress();
 
+        $items = $this->getEntityItems($args);
         $payload = [
             self::PAYLOAD_CLIENT => $this->getCountryCode((int) $entity->getStore()->getId()),
             self::PAYLOAD_RECIPIENT_NOTIFICATION => $shippingAddress->getPrefix(),
@@ -128,7 +129,7 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
             self::PAYLOAD_ZIP_CODE => $shippingAddress->getPostCode(),
             self::PAYLOAD_LANGUAGE => $this->getLanguageCode((int) $entity->getStore()->getId()),
             self::PAYLOAD_ORDER_DATE => $entity->getCreatedAt(),
-            self::PAYLOAD_ARTICLES => $this->getItemsPayload($entity->getAllVisibleItems())
+            self::PAYLOAD_ARTICLES => $this->getItemsPayload($items)
         ];
 
         if (isset($args[self::ORDER_ARG])) {
@@ -292,6 +293,19 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
         }
 
         return null;
+    }
+
+    protected function getEntityItems(array $args): ?array
+    {
+        if (isset($args[self::SHIPMENT_ARG])) {
+            return $args[self::SHIPMENT_ARG]->getAllItems();
+        }
+
+        if (isset($args[self::ORDER_ARG])) {
+            return $args[self::ORDER_ARG]->getAllVisibleItems();
+        }
+
+        return [];
     }
 
     protected function getArticleOptions($item)
