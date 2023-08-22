@@ -10,6 +10,13 @@
                     <ticket_id>LP-1589</ticket_id>
                 </entry>
             </tag>
+            <tag version="1.1.2" date="2023-08-21">
+                <entry>
+                    <type>FIX</type>
+                    <overview>Add only visible order items to order registration payload</overview>
+                    <ticket_id>LP-2142</ticket_id>
+                </entry>
+            </tag>
         </changelog>
     </module>
 </config>
