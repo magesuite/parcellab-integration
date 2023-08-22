@@ -128,7 +128,7 @@ class OrderCreation extends \CreativeStyle\ParcellabIntegration\Model\RequestPre
             self::PAYLOAD_ZIP_CODE => $shippingAddress->getPostCode(),
             self::PAYLOAD_LANGUAGE => $this->getLanguageCode((int) $entity->getStore()->getId()),
             self::PAYLOAD_ORDER_DATE => $entity->getCreatedAt(),
-            self::PAYLOAD_ARTICLES => $this->getItemsPayload($entity->getAllItems())
+            self::PAYLOAD_ARTICLES => $this->getItemsPayload($entity->getAllVisibleItems())
         ];
 
         if (isset($args[self::ORDER_ARG])) {
