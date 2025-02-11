@@ -1,7 +1,5 @@
 <?php
 
-\Magento\TestFramework\Workaround\Override\Fixture\Resolver::getInstance()->requireDataFixture('Magento/Catalog/_files/product_simple.php');
-
 /** @var \Magento\TestFramework\ObjectManager $objectManager */
 $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
@@ -12,7 +10,7 @@ $storeRepository = $objectManager->get(\Magento\Store\Api\StoreRepositoryInterfa
 /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
 $storeManager = $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
 
-$product = $productRepository->get('simple');
+$product = $productRepository->get('simple_parcellab');
 $beStore = $storeRepository->get('be_nl');
 
 $storeManager->setCurrentStore($beStore->getId());

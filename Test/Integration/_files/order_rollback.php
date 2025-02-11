@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /** @var \Magento\TestFramework\ObjectManager $objectManager */
 $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
