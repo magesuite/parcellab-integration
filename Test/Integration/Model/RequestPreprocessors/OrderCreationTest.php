@@ -50,8 +50,9 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
      * @magentoDbIsolation disabled
      * @magentoAppIsolation enabled
      * @magentoAppArea adminhtml
-     * @magentoDataFixture loadOrder
-     * @magentoDataFixture loadShipment
+     * @magentoDataFixture CreativeStyle_ParcellabIntegration::Test/Integration/_files/product.php
+     * @magentoDataFixture CreativeStyle_ParcellabIntegration::Test/Integration/_files/order.php
+     * @magentoDataFixture CreativeStyle_ParcellabIntegration::Test/Integration/_files/shipment.php
      * @magentoConfigFixture default_store parcellab/general/test_mode_enabled 1
      */
     public function testItPreparesCorrectShipmentPayloadForParcellab()
@@ -73,8 +74,9 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
      * @magentoDbIsolation disabled
      * @magentoAppIsolation enabled
      * @magentoAppArea adminhtml
-     * @magentoDataFixture loadOrder
-     * @magentoDataFixture loadShipment
+     * @magentoDataFixture CreativeStyle_ParcellabIntegration::Test/Integration/_files/product.php
+     * @magentoDataFixture CreativeStyle_ParcellabIntegration::Test/Integration/_files/order.php
+     * @magentoDataFixture CreativeStyle_ParcellabIntegration::Test/Integration/_files/shipment.php
      * @magentoConfigFixture default_store parcellab/general/test_mode_enabled 1
      */
     public function testItPreparesCorrectOrderPayloadForParcellab()
@@ -119,8 +121,8 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
                 'order_date' => $shipment->getCreatedAt(),
                 'articles' => [
                     [
-                        'articleNo' => 'simple',
-                        'articleName' => 'Simple Product',
+                        'articleNo' => 'simple_parcellab',
+                        'articleName' => 'Simple Product Parcellab',
                         'articleCategory' => 'Default Category',
                         'articleImageUrl' => $productImageUrl,
                         'quantity' => '2.0000',
@@ -161,8 +163,8 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
                 'order_date' => $order->getCreatedAt(),
                 'articles' => [
                     [
-                        'articleNo' => 'simple',
-                        'articleName' => 'Simple Product',
+                        'articleNo' => 'simple_parcellab',
+                        'articleName' => 'Simple Product Parcellab',
                         'articleCategory' => 'Default Category',
                         'articleImageUrl' => $productImageUrl,
                         'quantity' => '2.0000',
@@ -183,20 +185,5 @@ class OrderCreationTest extends \PHPUnit\Framework\TestCase
     protected function getProductImageUrl(\Magento\Catalog\Api\Data\ProductInterface $product): string
     {
         return $this->imageHelper->init($product, 'product_thumbnail_image')->getUrl();
-    }
-
-    public static function loadOrder()
-    {
-        include __DIR__ . '/../../_files/order.php';
-    }
-
-    public static function loadOrderRollback()
-    {
-        include __DIR__ . '/../../_files/order_rollback.php';
-    }
-
-    public static function loadShipment()
-    {
-        include __DIR__ . '/../../_files/shipment.php';
     }
 }
